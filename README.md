@@ -43,6 +43,7 @@ Rule {
     }
 }
 ```
+Documentation for the rule language can be found [here](https://docs.mcafee.com/bundle/endpoint-security-v10-5-3-adaptive-threat-protection-expert-rules-syntax-reference/resource/PD27227.pdf).
 
 * **Trigger**: Some steps to trigger the rule and verify that it actually works. You can put a reference here to any public and safe tool. 
 
