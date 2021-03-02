@@ -1,0 +1,45 @@
+## T1059.001 IOC1 - Detect PowerShell Web Requests
+
+## Author
+https://github.com/SimpleInfoSec
+
+## Description
+This rule detects when PowerShell or PWSH are used to download files from the internet using the "Invoke-WebRequest" CMDLET or the "System.Net.WebClient method". 
+This rule may serve as an IOC that an adversary has acheived initial access (ex. through a MalDoc) and is attempting execution of additional malicious code from the internet. 
+This rule is helpful in detecting adversaries that are attempting to "live off the land" by using standard commands to "blend in" and avoid detection.
+
+## Rule TCL
+```tcl
+Rule {
+    Process {
+        Include OBJECT_NAME { -v "*PowerShell*" }
+        Include OBJECT_NAME { -v "*PWSH*" }
+    }
+    Target {
+        Match PROCESS { 
+            Include PROCESS_CMD_LINE { -v "*Invoke-WebRequest*" }
+            Include PROCESS_CMD_LINE { -v "*Net.WebClient*"}
+        }
+    }
+}
+```
+
+## Trigger
+You can trigger this rule by opening CMD and running any of the following commands:
+PowerShell "Invoke-WebRequest -URI www.McAfee.com"
+"C:\Program Files\PowerShell\7-preview\pwsh.exe" -Command "Invoke-WebRequest -URI www.McAfee.com"
+Powershell -Command "(New-Object System.Net.WebClient).OpenRead('https://www.McAfee.com')"
+"C:\Program Files\PowerShell\7-preview\pwsh.exe" "(New-Object System.Net.WebClient).OpenRead('https://www.McAfee.com')"
+
+**Trigger Notes**: An adversary is probably going to use a method other than "OpenRead" (ex: the DownloadFile method), I just wanted provide POC code. 
+I fully qualified the path to PWSH on my machine as it is not in my path variable, you may or may not need to do this. 
+
+## Tested Platforms
+Windows 10, ENS 10.7.x, PowerShell 5.1.17763.1490 & PWSH 7.2.0-preview.3
+
+## Notes
+This is intended to be a simple rule that provides an easy method to detect PowerShell initiating web requests, it is not all-encompassing and you may need to tune it a bit for your environment. 
+There are many ways that adversaries use PowerShell to download files from the internet, and they will often attempt to obfuscate the purpose of the commands to evade detection. 
+Even if you do not enable blocking for this rule, it can be used as an IOC to feed to a SIEM, trigger automatic responses in ePO, or trigger a playbook/workflow for follow-up analysis. 
+I highly recommend reviewing the adversary technqiues associated with T1059.001 in the MITRE ATT&CK for additional code samples that you can use in your rules, and to better understand the
+variety of ways that adversaries use PowerShell to download files from the internet. 
