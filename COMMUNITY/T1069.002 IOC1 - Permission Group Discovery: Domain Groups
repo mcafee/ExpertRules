@@ -1,0 +1,37 @@
+## T1069.002 IOC1 - Permission Group Discovery: Domain Groups
+
+## Author
+https://github.com/SimpleInfoSec
+
+## Description
+This rule detects the use of the Net executable to enumerate the "Domain admins" & "enterprise admins" security groups in Active Directory. 
+Adversaries often use built-in executables (like Net) to perform discovery while "living off the land" in order to avoid detection. 
+
+## Rule TCL
+```tcl
+Rule {
+    Process {
+        Include OBJECT_NAME { -v "Net.exe" }
+        Include PROCESS_CMD_LINE { -v "*group*"}
+    }
+    Target {
+        Match PROCESS { 
+            Include PROCESS_CMD_LINE { -v "*Domain admins*" }
+            Include PROCESS_CMD_LINE { -v "*enterprise admins*"}
+        }
+    }
+}
+```
+
+## Trigger
+You can trigger this rule by opening CMD, PowerShell, or PWSH and running the following commands:
+net group "Domain admins" /DOMAIN
+net group "enterprise admins" /DOMAIN
+
+## Tested Platforms
+Windows 10, ENS 10.7.x, PowerShell 5.1.17763.1490 & PWSH 7.2.0-preview.3
+
+## Notes
+This is intended to be a simple rule that alerts on abnormal enumeration of privileged domain groups. You can add other sensitive groups in your domain to the Target section
+to customize this for your environment. The enumeration of the Domain Admins group using the net executable seems to be a common IOC shared by multiple APT's. I've moved this
+rule to 'block' b/c there just isn't any legitimate use of Net to enumerate these groups in my environment, but you may be better suited just using it as an IOC.
